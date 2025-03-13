@@ -3,13 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+    <title>Chicago Crime COVID-19 Analysis</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="container"> <!-- Centers content and sets max width -->
-        <h1></h1>
-        <div id="vis"></div> <!--  Will hold our visualization (SVG) -->
+        <h1>COVID-19 and Crime Distribution in Chicago</h1>
+        <!-- Controls section -->
+        <div class="controls-section">
+            <h2>Controls</h2>
+            <div id="year-filter" class="control-element">
+                <!-- Year filter controls will go here -->
+            </div>
+            <!-- Add more controls as needed -->
+        </div>
+        
+        <!-- Visualization section with flex layout -->
+        <div class="visualization-container">
+            <!-- Left column with pie charts (stacked) -->
+            <div class="charts-column">
+                <!-- First pie chart -->
+                <div class="visualization-section">
+                    <h2>Crime Types</h2>
+                    <div id="crime-type-vis" class="vis-element"></div>
+                </div>
+                
+                <!-- Second pie chart -->
+                <div class="visualization-section">
+                    <h2>Location Types</h2>
+                    <div id="location-type-vis" class="vis-element"></div>
+                </div>
+            </div>
+            
+            <!-- Right column with map -->
+            <div class="map-column">
+                <!-- Map visualization -->
+                <div class="visualization-section">
+                    <h2>Geographic Distribution</h2>
+                    <div id="map-vis" class="vis-element"></div>
+                </div>
+            </div>
+        </div>
+        <p class="description">This is an interactive visualization of crime distribution across geography, location, time, and category during the years of the COVID-19 pandemic and the following years (2020-2023). To accomplish this, we used public City of Chicago crime data from 2001-present, parsing only the years 2020-2023. We chose to focus on geographic variables (latitude and longitude), crime type (primary crime type), and crime location description (location description) as well as the time of the arrest (year).</p>
     </div>
     
     <!-- Load D3.js -->
