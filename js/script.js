@@ -32,50 +32,46 @@ function updateVisualization() {
 }
 
 function setupTimeSlider() {
-    const minDate = d3.min(allData, d => d.date);
-    const maxDate = d3.max(allData, d => d.date);
+    const minDate = d3.timeMonth.floor(d3.min(allData, d => d.date));
+    const maxDate = d3.timeMonth.ceil(d3.max(allData, d => d.date));
 
     const sliderScale = d3.scaleTime()
         .domain([minDate, maxDate])
         .range([0, 100]);
 
     const slider = d3.sliderBottom(sliderScale)
-        .width(width)
-        .height(20)
-        .min(minDate)
-        .max(maxDate)
-        .step(1)
-        .displayValue(false)
+        .width(600)
+        .tickValues(getTickValues(minDate, maxDate))
+        .tickFormat(d3.timeFormat("%b %Y")) // Display month & year
+        .step(1000 * 60 * 60 * 24 * 30) // Step by approx. 1 month
         .on('onchange', (val) => {
-            // Filter data based on slider values
             timeFilteredData.length = 0; // Clear the array
-            
-            // Add filtered data based on date range
             allData.forEach(d => {
                 if (d.date >= val[0] && d.date <= val[1]) {
-                timeFilteredData.push(d);
+                    timeFilteredData.push(d);
                 }
             });
-        })
+            updateVisualization(); // Refresh visualization with filtered data
+        });
 
-        // Add slider to the container
-        const gSlider = d3.select('#year-slider-container')
-          .append('svg')
-          .attr('width', width + margin.left + margin.right)
-          .attr('height', 100)
-          .append('g')
-          .attr('transform', `translate(${margin.left},30)`);
-        
-        gSlider.call(slider);
-        
-        // Add labels
-        d3.select('#year-slider-container')
-          .append('div')
-          .attr('class', 'slider-label')
-          .style('text-align', 'center')
-          .style('margin-top', '10px')
-          .text('Filter by Date Range (2020-2023)');
+    const gSlider = d3.select('#year-slider-container')
+        .append('svg')
+        .attr('width', 700)
+        .attr('height', 80)
+        .append('g')
+        .attr('transform', `translate(50,30)`);
+
+    gSlider.call(slider);
+
+    // Label
+    d3.select('#year-slider-container')
+        .append('div')
+        .attr('class', 'slider-label')
+        .style('text-align', 'center')
+        .style('margin-top', '10px')
+        .text('Filter Crime Data by Month and Year');
 }
+
 
 // Helper function to generate ticks with years as main ticks and months as subticks
 function getTickValues(startDate, endDate) {
