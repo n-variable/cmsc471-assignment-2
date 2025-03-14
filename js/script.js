@@ -28,83 +28,77 @@ function getCrimeLocationDistribution(data) {
 }
 
 function updateVisualization() {
-
+    renderPieChart("#crime-type-vis", getCrimeTypeDistribution(timeFilteredData), "Crime Type Distribution");
+    renderPieChart("#location-type-vis", getCrimeLocationDistribution(timeFilteredData), "Crime Location Distribution");
 }
 
 function setupTimeSlider() {
+    if (!allData.length) {
+        console.error("No data available for slider.");
+        return;
+    }
+
     const minDate = d3.timeMonth.floor(d3.min(allData, d => d.date));
     const maxDate = d3.timeMonth.ceil(d3.max(allData, d => d.date));
 
-    const sliderScale = d3.scaleTime()
-        .domain([minDate, maxDate])
-        .range([0, 100]);
-
-    const slider = d3.sliderBottom(sliderScale)
-        .width(600)
-        .tickValues(getTickValues(minDate, maxDate))
-        .tickFormat(d3.timeFormat("%b %Y")) // Display month & year
-        .step(1000 * 60 * 60 * 24 * 30) // Step by approx. 1 month
-        .on('onchange', (val) => {
-            timeFilteredData.length = 0; // Clear the array
+    const slider = d3.sliderBottom()
+        .min(minDate)
+        .max(maxDate)
+        .width(500)
+        .tickFormat(d3.timeFormat("%b %Y")) // Format as "Sep 2023"
+        .step(1000 * 60 * 60 * 24 * 30) // Approximate 1-month step
+        .on("onchange", (val) => {
+            timeFilteredData.length = 0;
             allData.forEach(d => {
-                if (d.date >= val[0] && d.date <= val[1]) {
-                    timeFilteredData.push(d);
-                }
+                if (d.date >= val) timeFilteredData.push(d);
             });
-            updateVisualization(); // Refresh visualization with filtered data
+            updateVisualization(); // Refresh chart after filtering
         });
 
-    const gSlider = d3.select('#year-slider-container')
-        .append('svg')
-        .attr('width', 700)
-        .attr('height', 80)
-        .append('g')
-        .attr('transform', `translate(50,30)`);
+    d3.select("#year-slider-container").html(""); // Clear existing content
+    const gSlider = d3.select("#year-slider-container")
+        .append("svg")
+        .attr("width", 600)
+        .attr("height", 80)
+        .append("g")
+        .attr("transform", "translate(50,30)");
 
     gSlider.call(slider);
-
-    // Label
-    d3.select('#year-slider-container')
-        .append('div')
-        .attr('class', 'slider-label')
-        .style('text-align', 'center')
-        .style('margin-top', '10px')
-        .text('Filter Crime Data by Month and Year');
 }
 
+function renderPieChart(container, data, title) {
+    d3.select(container).html(""); // Clear previous chart
 
-// Helper function to generate ticks with years as main ticks and months as subticks
-function getTickValues(startDate, endDate) {
-    const ticks = [];
-    
-    // Add year ticks (major ticks)
-    const years = d3.timeYear.range(
-      d3.timeYear.floor(startDate),
-      d3.timeYear.ceil(endDate)
-    );
-    
-    years.forEach(year => {
-      ticks.push(year); // Add the year tick
-      
-      // Add month ticks (minor ticks)
-      const monthsInYear = d3.timeMonth.range(
-        d3.max([startDate, d3.timeYear.floor(year)]),
-        d3.min([endDate, d3.timeYear.offset(year, 1)])
-      );
-      
-      // Add only selected months as minor ticks to avoid overcrowding
-      monthsInYear.forEach((month, i) => {
-        // Add every 3rd month as a minor tick
-        if (i % 3 === 1) {
-          ticks.push(month);
-        }
-      });
-    });
-    
-    return ticks;
+    const width = 300, height = 300, radius = Math.min(width, height) / 2;
+    const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+    const svg = d3.select(container)
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+    const pie = d3.pie().value(d => d.count);
+    const arc = d3.arc().innerRadius(0).outerRadius(radius);
+
+    const slices = svg.selectAll(".arc")
+        .data(pie(data))
+        .enter().append("g")
+        .attr("class", "arc");
+
+    slices.append("path")
+        .attr("d", arc)
+        .attr("fill", d => color(d.data.category));
+
+    slices.append("text")
+        .attr("transform", d => `translate(${arc.centroid(d)})`)
+        .attr("dy", "0.35em")
+        .style("text-anchor", "middle")
+        .text(d => d.data.category);
 }
 
-function mapData(d){
+function mapData(d) {
     return { 
         arrest: d["Arrest"] === "true",
         beat: parseInt(d["Beat"]),
@@ -116,25 +110,23 @@ function mapData(d){
         year: parseInt(d["Year"]),
         location_description: d["Location Description"],
         date: new Date(d["Date"])
-    }
+    };
 }
 
-// Load Data
-function init(){
-    d3.csv("https://cmsc471.nyc3.digitaloceanspaces.com/covid_crimes.csv", d => mapData(d))
+function init() {
+    d3.csv("https://cmsc471.nyc3.digitaloceanspaces.com/covid_crimes.csv", mapData)
     .then(data => {
-        console.log("Data loaded:", data[0], "records");
+        console.log("Data loaded:", data.length, "records");
 
-        allData.push(...validData);
-
-        setupTimeSlider();
+        allData.push(...data);
+        setupTimeSlider(); 
+        updateVisualization(); // Initialize visualizations
     })
     .catch(error => {
-        console.error("Error loading the dataset:", error);
+        console.error("Error loading dataset:", error);
         document.getElementById("error-message").textContent = 
             "Failed to load data. Please try refreshing the page.";
     });
 }
 
-// Load data when page loads
 window.addEventListener('load', init);
