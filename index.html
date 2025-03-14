@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chicago Crime COVID-19 Analysis</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdn.rawgit.com/RasmusFonseca/d3RangeSlider/master/d3RangeSlider.css" rel="stylesheet">
 </head>
 <body>
     <div class="container"> <!-- Centers content and sets max width -->
@@ -12,10 +13,8 @@
         <!-- Controls section -->
         <div class="controls-section">
             <h2>Controls</h2>
-            <div id="year-filter" class="control-element">
-                <!-- Year filter controls will go here -->
+            <div id="year-slider-container">
             </div>
-            <!-- Add more controls as needed -->
         </div>
         
         <!-- Visualization section with flex layout -->
@@ -44,11 +43,15 @@
                 </div>
             </div>
         </div>
-        <p class="description">This is an interactive visualization of crime distribution across geography, location, time, and category during the years of the COVID-19 pandemic and the following years (2020-2023). To accomplish this, we used public City of Chicago crime data from 2001-present, parsing only the years 2020-2023. We chose to focus on geographic variables (latitude and longitude), crime type (primary crime type), and crime location description (location description) as well as the time of the arrest (year).</p>
+        <p class="description">This is an interactive visualization of crime distribution across geography, location, time, and category in the city of Chicago during the years of the COVID-19 pandemic and the following years (2020-2023). To accomplish this, we preprocessedpublic City of Chicago crime data from 2001-present, parsing only the years 2020-2023 and only processing crimes with geographical data. We chose to focus on geographic variables (latitude and longitude), crime type (primary crime type), and crime location description (location description) as well as the time of the arrest (year and date).</p>
     </div>
     
     <!-- Load D3.js -->
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://cdn.rawgit.com/RasmusFonseca/d3RangeSlider/master/d3RangeSlider.js"></script>
+    <script>
+        
+    </script>
     <script src="js/script.js"></script>
 </body>
 </html>
