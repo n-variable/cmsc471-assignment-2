@@ -51,6 +51,9 @@
             </div>
         </div>
         <p class="description">This is an interactive visualization of crime distribution across location, crime category and time as well as correlation between crime and location in the city of Chicago during the years of the COVID-19 pandemic and the following years (2020-2023). To accomplish this, we preprocessed public City of Chicago crime data from 2001-present, parsing only the years 2020-2023 and discarding crimes with null values using pandas in python. We chose to focus on crime type (primary crime type), and crime location description (location description) as well as the time of the arrest (year and date).</p>
+        <p class="description">Initially, we wanted to show a visualization of crime type, location and geographical distribution during the COVID-19 years. However, creating a map of Chicago and plotting latitude and longitude coordinates proved harder than expected. After some deliberation, we realized that geographic distribution likely didn’t vary much during the COVID-19 years, and that correlation between crime type and crime location as COVID-19 progressed would be much more interesting. With that, we decided to implement a year range slider, two pie charts, describing the independent distributions of the top 10 crime types and crime locations for the specified time range, and joint distribution a heat grid map describing the distribution of both location and crime type. The year range slider is a dynamic filter allowing users to select either a specific year by dragging the handles to the same year, or a range of years that they would like to visualize. This dynamic filter is linked to both pie charts as well as the heat grid map, allowing users to step over time or view distributions over specific time ranges. We implemented a details-on-demand feature via tooltips for each section of the pie chart, giving users the ability to view specific incidence counts and rates as well as the arrest rate for each crime type and location. Finally, we implemented another details-on-demand feature via tooltips for each tile of the heat grid map, allowing users to see how many crimes there were by both location and type.</p>
+        <p class="description">We used the public City of Chicago CSV file provided by the City of Chicago data portal. We parsed down this large dataset into the official COVID-19 years (2020-2023) as defined by the Center for Disease Control (CDC). Finally, we preprocessed the data, removing rows with insufficient information and uploaded the preprocessed CSV file to a CDN for faster loading.</p>
+        <p class="description">We spent roughly 10 hours building the visualization, with about 2 hours deliberating datasets to explore as well as deciding potentially interesting parts of the Chicago crime database to explore once we decided on a dataset. Building the visualization took by far longer because of our wasted foray into displaying geographic distribution, however features like the pie chart and grid chart were much easier to implement as we could just use D3. We split the work into three parts, the pie charts, the grid chart, and then the time slider, with Pranav implementing the pie charts and the grid charts and Naishal implementing the time slider.</p>
     </div>
     
     <!-- Load D3.js -->
@@ -65,20 +68,17 @@
         const crimeTypeVis = document.getElementById('crime-type-vis');
         const locationTypeVis = document.getElementById('location-type-vis');
         const heatmapVis = document.getElementById('grid-heatmap-vis');
-        
-        // Add placeholder to crime type visualization
+
         crimeTypeVis.innerHTML = `
             <div style="width: 600px; height: 300px; background-color: lightgray;">
             </div>
         `;
-        
-        // Add placeholder to location type visualization
+
         locationTypeVis.innerHTML = `
             <div style="width: 600px; height: 300px; background-color: lightgray;">
             </div>
         `;
-        
-        // Add placeholder to heatmap visualization
+
         heatmapVis.innerHTML = `
             <div style="width: 800px; height: 600px; background-color: lightgray;">
             </div>
