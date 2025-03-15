@@ -1,4 +1,4 @@
-const allData = [];
+let allData = [];
 const timeFilteredData = [];
 const crimeTypeDistribution = [];
 const crimeLocationDistribution = [];
@@ -28,84 +28,275 @@ function getCrimeLocationDistribution(data) {
 }
 
 function updateVisualization() {
+    // Get the aggregated data
+    const crimeTypes = getCrimeTypeDistribution(timeFilteredData);
+    const locationTypes = getCrimeLocationDistribution(timeFilteredData);
+    
+    // Clear existing arrays and update with new data
+    crimeTypeDistribution.length = 0;
+    crimeLocationDistribution.length = 0;
+    
+    crimeTypes.forEach(d => crimeTypeDistribution.push(d));
+    locationTypes.forEach(d => crimeLocationDistribution.push(d));
+    
+    // Render the charts
+    renderCrimeTypePieChart();
+    renderLocationPieChart();
+}
 
+function renderCrimeTypePieChart() {
+    const width = 300;
+    const height = 300;
+    const radius = Math.min(width, height) / 2;
+    
+    // Clear previous chart
+    d3.select("#crime-type-vis").html("");
+    
+    // Create SVG element
+    const svg = d3.select("#crime-type-vis")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", `translate(${width/2}, ${height/2})`);
+    
+    // Take top 10 crime types to avoid cluttering
+    const data = crimeTypeDistribution.slice(0, 10);
+    
+    // Create color scale
+    const colorScale = d3.scaleOrdinal()
+        .domain(data.map(d => d.category))
+        .range(d3.schemeTableau10);
+    
+    // Create pie generator
+    const pie = d3.pie()
+        .value(d => d.count)
+        .sort(null);
+    
+    // Create arc generator
+    const arc = d3.arc()
+        .innerRadius(0)
+        .outerRadius(radius * 0.8);
+    
+    // Create label arc
+    const labelArc = d3.arc()
+        .innerRadius(radius * 0.6)
+        .outerRadius(radius * 0.8);
+    
+    // Create pie chart
+    const arcs = svg.selectAll(".arc")
+        .data(pie(data))
+        .enter()
+        .append("g")
+        .attr("class", "arc");
+    
+    // Add color fill
+    arcs.append("path")
+        .attr("d", arc)
+        .attr("fill", d => colorScale(d.data.category))
+        .attr("stroke", "white")
+        .style("stroke-width", "2px")
+        .style("opacity", 0.8)
+        .on("mouseover", function(event, d) {
+            d3.select(this)
+                .style("opacity", 1);
+                
+            // Display tooltip with information
+            const percent = ((d.endAngle - d.startAngle) / (2 * Math.PI) * 100).toFixed(1);
+            const tooltip = d3.select("body").append("div")
+                .attr("class", "tooltip")
+                .style("position", "absolute")
+                .style("background", "white")
+                .style("border", "1px solid #ddd")
+                .style("border-radius", "5px")
+                .style("padding", "10px")
+                .style("opacity", 0.9)
+                .style("left", (event.pageX + 10) + "px")
+                .style("top", (event.pageY - 15) + "px");
+                
+            tooltip.html(`
+                <strong>${d.data.category}</strong><br>
+                Count: ${d.data.count}<br>
+                Percentage: ${percent}%<br>
+                Arrest Rate: ${(d.data.arrest_rate * 100).toFixed(1)}%
+            `);
+        })
+        .on("mouseout", function() {
+            d3.select(this)
+                .style("opacity", 0.8);
+            d3.selectAll(".tooltip").remove();
+        });
+    
+    // Add legend
+    const legend = svg.selectAll(".legend")
+        .data(data)
+        .enter()
+        .append("g")
+        .attr("class", "legend")
+        .attr("transform", (d, i) => `translate(-${width/2 + 10}, ${-height/2 + 20 + i * 20})`);
+    
+    legend.append("rect")
+        .attr("width", 12)
+        .attr("height", 12)
+        .attr("fill", d => colorScale(d.category));
+    
+    legend.append("text")
+        .attr("x", 20)
+        .attr("y", 10)
+        .text(d => {
+            // Truncate long category names
+            return d.category.length > 20 ? d.category.substring(0, 20) + "..." : d.category;
+        })
+        .style("font-size", "12px");
+}
+
+function renderLocationPieChart() {
+    const width = 300;
+    const height = 300;
+    const radius = Math.min(width, height) / 2;
+    
+    // Clear previous chart
+    d3.select("#location-type-vis").html("");
+    
+    // Create SVG element
+    const svg = d3.select("#location-type-vis")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", `translate(${width/2}, ${height/2})`);
+    
+    // Take top 10 locations to avoid cluttering
+    const data = crimeLocationDistribution.slice(0, 10);
+    
+    // Create color scale
+    const colorScale = d3.scaleOrdinal()
+        .domain(data.map(d => d.category))
+        .range(d3.schemeTableau10);
+    
+    // Create pie generator
+    const pie = d3.pie()
+        .value(d => d.count)
+        .sort(null);
+    
+    // Create arc generator
+    const arc = d3.arc()
+        .innerRadius(0)
+        .outerRadius(radius * 0.8);
+    
+    // Create label arc
+    const labelArc = d3.arc()
+        .innerRadius(radius * 0.6)
+        .outerRadius(radius * 0.8);
+    
+    // Create pie chart
+    const arcs = svg.selectAll(".arc")
+        .data(pie(data))
+        .enter()
+        .append("g")
+        .attr("class", "arc");
+    
+    // Add color fill
+    arcs.append("path")
+        .attr("d", arc)
+        .attr("fill", d => colorScale(d.category))
+        .attr("stroke", "white")
+        .style("stroke-width", "2px")
+        .style("opacity", 0.8)
+        .on("mouseover", function(event, d) {
+            d3.select(this)
+                .style("opacity", 1);
+                
+            // Display tooltip with information
+            const percent = ((d.endAngle - d.startAngle) / (2 * Math.PI) * 100).toFixed(1);
+            const tooltip = d3.select("body").append("div")
+                .attr("class", "tooltip")
+                .style("position", "absolute")
+                .style("background", "white")
+                .style("border", "1px solid #ddd")
+                .style("border-radius", "5px")
+                .style("padding", "10px")
+                .style("opacity", 0.9)
+                .style("left", (event.pageX + 10) + "px")
+                .style("top", (event.pageY - 15) + "px");
+                
+            tooltip.html(`
+                <strong>${d.data.category}</strong><br>
+                Count: ${d.data.count}<br>
+                Percentage: ${percent}%<br>
+                Arrest Rate: ${(d.data.arrest_rate * 100).toFixed(1)}%
+            `);
+        })
+        .on("mouseout", function() {
+            d3.select(this)
+                .style("opacity", 0.8);
+            d3.selectAll(".tooltip").remove();
+        });
+    
+    // Add legend
+    const legend = svg.selectAll(".legend")
+        .data(data)
+        .enter()
+        .append("g")
+        .attr("class", "legend")
+        .attr("transform", (d, i) => `translate(-${width/2 + 10}, ${-height/2 + 20 + i * 20})`);
+    
+    legend.append("rect")
+        .attr("width", 12)
+        .attr("height", 12)
+        .attr("fill", d => colorScale(d.category));
+    
+    legend.append("text")
+        .attr("x", 20)
+        .attr("y", 10)
+        .text(d => {
+            // Truncate long category names
+            return d.category.length > 20 ? d.category.substring(0, 20) + "..." : d.category;
+        })
+        .style("font-size", "12px");
 }
 
 function setupTimeSlider() {
-    const minDate = d3.min(allData, d => d.date);
-    const maxDate = d3.max(allData, d => d.date);
-
-    const sliderScale = d3.scaleTime()
-        .domain([minDate, maxDate])
-        .range([0, 100]);
-
-    const slider = d3.sliderBottom(sliderScale)
-        .width(width)
-        .height(20)
-        .min(minDate)
-        .max(maxDate)
-        .step(1)
-        .displayValue(false)
-        .on('onchange', (val) => {
-            // Filter data based on slider values
-            timeFilteredData.length = 0; // Clear the array
-            
-            // Add filtered data based on date range
-            allData.forEach(d => {
-                if (d.date >= val[0] && d.date <= val[1]) {
-                timeFilteredData.push(d);
+    const timeSlider = document.getElementById("slider");
+    
+    noUiSlider.create(timeSlider, {
+        start: [2020, 2023], // 2020 to 2023
+        connect: true,
+        step: 1,
+        range: {
+            'min': 2020,
+            'max': 2023
+        },
+        pips: {
+            mode: 'steps',
+            density: 1,
+            format: {
+                to: function(value) {
+                    // Just return the year as is
+                    return Math.round(value);
                 }
-            });
-        })
-
-        // Add slider to the container
-        const gSlider = d3.select('#year-slider-container')
-          .append('svg')
-          .attr('width', width + margin.left + margin.right)
-          .attr('height', 100)
-          .append('g')
-          .attr('transform', `translate(${margin.left},30)`);
-        
-        gSlider.call(slider);
-        
-        // Add labels
-        d3.select('#year-slider-container')
-          .append('div')
-          .attr('class', 'slider-label')
-          .style('text-align', 'center')
-          .style('margin-top', '10px')
-          .text('Filter by Date Range (2020-2023)');
-}
-
-// Helper function to generate ticks with years as main ticks and months as subticks
-function getTickValues(startDate, endDate) {
-    const ticks = [];
-    
-    // Add year ticks (major ticks)
-    const years = d3.timeYear.range(
-      d3.timeYear.floor(startDate),
-      d3.timeYear.ceil(endDate)
-    );
-    
-    years.forEach(year => {
-      ticks.push(year); // Add the year tick
-      
-      // Add month ticks (minor ticks)
-      const monthsInYear = d3.timeMonth.range(
-        d3.max([startDate, d3.timeYear.floor(year)]),
-        d3.min([endDate, d3.timeYear.offset(year, 1)])
-      );
-      
-      // Add only selected months as minor ticks to avoid overcrowding
-      monthsInYear.forEach((month, i) => {
-        // Add every 3rd month as a minor tick
-        if (i % 3 === 1) {
-          ticks.push(month);
+            }
         }
-      });
     });
     
-    return ticks;
+    // Add event listener for value changes
+    timeSlider.noUiSlider.on('update', function(values) {
+        const startYear = Math.round(parseFloat(values[0]));
+        const endYear = Math.round(parseFloat(values[1]));
+        
+        // Filter data based on the selected year range
+        timeFilteredData.length = 0; // Clear the array
+        allData.forEach(d => {
+            if (d.year >= startYear && d.year <= endYear) {
+                timeFilteredData.push(d);
+            }
+        });
+        
+        console.log('Time range updated:', startYear, 'to', endYear, 'Records:', timeFilteredData.length);
+        
+        // Update visualization with the filtered data
+        updateVisualization();
+    });
 }
 
 function mapData(d){
@@ -125,19 +316,19 @@ function mapData(d){
 
 // Load Data
 function init(){
+    document.getElementById('status-text').innerText = 'Loading Data...';
     d3.csv("https://cmsc471.nyc3.digitaloceanspaces.com/covid_crimes.csv", d => mapData(d))
     .then(data => {
         console.log("Data loaded:", data[0], "records");
 
-        allData.push(...validData);
+        allData = data;
 
         setupTimeSlider();
+        updateVisualization(); // Initialize visualization with all data
+
+        // Update the status-text paragraph text
+        document.getElementById('status-text').innerText = 'Data Loaded';
     })
-    .catch(error => {
-        console.error("Error loading the dataset:", error);
-        document.getElementById("error-message").textContent = 
-            "Failed to load data. Please try refreshing the page.";
-    });
 }
 
 // Load data when page loads
