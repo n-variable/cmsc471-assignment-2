@@ -413,6 +413,12 @@ function setupTimeSlider() {
                 to: function(value) {
                     return Math.round(value);
                 }
+            },
+            cssClasses: {
+                large: 'noUi-large',
+                small: 'noUi-large',
+                marker: 'noUi-marker',
+                value: 'noUi-value'
             }
         }
     });
