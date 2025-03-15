@@ -73,3 +73,25 @@
     stroke: #f5f5f5;
     stroke-width: 8px;
   }
+
+  /* Simplified loading placeholder styles */
+  .loading-placeholder {
+    background-color: lightgray;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Match placeholder sizes to chart dimensions */
+  #crime-type-vis .loading-placeholder,
+  #location-type-vis .loading-placeholder {
+    width: 600px;
+    height: 300px;
+  }
+
+  #grid-heatmap-vis .loading-placeholder {
+    width: 800px;
+    height: 600px;
+  }

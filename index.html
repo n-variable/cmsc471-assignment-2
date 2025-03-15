@@ -45,19 +45,47 @@
             <div class="map-column">
                 <!-- Map visualization -->
                 <div class="visualization-section">
-                    <h2>Geographic Distribution</h2>
-                    <div id="map-vis" class="vis-element"></div>
+                    <h2>Crime Type by Location Heatmap</h2>
+                    <div id="grid-heatmap-vis" class="vis-element"></div>
                 </div>
             </div>
         </div>
-        <p class="description">This is an interactive visualization of crime distribution across geography, location, time, and category in the city of Chicago during the years of the COVID-19 pandemic and the following years (2020-2023). To accomplish this, we preprocessedpublic City of Chicago crime data from 2001-present, parsing only the years 2020-2023 and only processing crimes with geographical data. We chose to focus on geographic variables (latitude and longitude), crime type (primary crime type), and crime location description (location description) as well as the time of the arrest (year and date).</p>
+        <p class="description">This is an interactive visualization of crime distribution across location, crime category and time as well as correlation between crime and location in the city of Chicago during the years of the COVID-19 pandemic and the following years (2020-2023). To accomplish this, we preprocessed public City of Chicago crime data from 2001-present, parsing only the years 2020-2023 and discarding crimes with null values using pandas in python. We chose to focus on crime type (primary crime type), and crime location description (location description) as well as the time of the arrest (year and date).</p>
     </div>
     
     <!-- Load D3.js -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-pip/leaflet-pip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
     <script>
-
+    // Initialize placeholders immediately when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        // Add placeholders to each visualization container
+        const crimeTypeVis = document.getElementById('crime-type-vis');
+        const locationTypeVis = document.getElementById('location-type-vis');
+        const heatmapVis = document.getElementById('grid-heatmap-vis');
+        
+        // Add placeholder to crime type visualization
+        crimeTypeVis.innerHTML = `
+            <div style="width: 600px; height: 300px; background-color: lightgray;">
+            </div>
+        `;
+        
+        // Add placeholder to location type visualization
+        locationTypeVis.innerHTML = `
+            <div style="width: 600px; height: 300px; background-color: lightgray;">
+            </div>
+        `;
+        
+        // Add placeholder to heatmap visualization
+        heatmapVis.innerHTML = `
+            <div style="width: 800px; height: 600px; background-color: lightgray;">
+            </div>
+        `;
+        
+        console.log('Placeholders initialized');
+    });
     </script>
     <script src="js/script.js"></script>
 </body>
